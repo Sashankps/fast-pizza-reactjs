@@ -7,6 +7,10 @@ import { clearCart } from "./cartSlice";
 function Cart() {
   const username = useSelector((store) => store.user.username);
   const cart = useSelector((store) => store.cart.cart);
+  let isCartEmpty = false;
+  if (cart.length === 0) {
+    isCartEmpty = true;
+  }
   const dispatch = useDispatch();
 
   const clearCartHandler = () => {
@@ -26,15 +30,22 @@ function Cart() {
         ))}
       </ul>
 
-      <div className="mt-6 space-x-2">
-        <Button to="/order/new" type="primary">
-          Order pizzas
-        </Button>
-
-        <Button onClick={clearCartHandler} type="secondary">
-          Clear cart
-        </Button>
-      </div>
+      {isCartEmpty ? (
+        <>
+          <h1 className="mt-10 text-xl font-bold">
+            Add pizzas to continue ordering{" "}
+          </h1>
+        </>
+      ) : (
+        <div className="mt-6 space-x-2">
+          <Button to="/order/new" type="primary">
+            Order pizzas
+          </Button>
+          <Button onClick={clearCartHandler} type="secondary">
+            Clear cart
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
