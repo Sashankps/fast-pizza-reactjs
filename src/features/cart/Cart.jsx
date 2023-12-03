@@ -1,18 +1,17 @@
-import LinkButton from '../../ui/LinkButton';
-import Button from '../../ui/Button';
-import CartItem from './CartItem';
-import { useDispatch, useSelector } from 'react-redux';
-import { clearCart } from './cartSlice';
-
+import LinkButton from "../../ui/LinkButton";
+import Button from "../../ui/Button";
+import CartItem from "./CartItem";
+import { useDispatch, useSelector } from "react-redux";
+import { clearCart } from "./cartSlice";
 
 function Cart() {
-  const username = useSelector( store => store.user.username); 
-  const cart = useSelector(store => store.cart.cart); 
-  const dispatch = useDispatch(); 
+  const username = useSelector((store) => store.user.username);
+  const cart = useSelector((store) => store.cart.cart);
+  const dispatch = useDispatch();
 
-  const clearCartHandler = () => { 
-    dispatch(clearCart()); 
-  }
+  const clearCartHandler = () => {
+    dispatch(clearCart());
+  };
   // const cart = fakeCart;
 
   return (
@@ -32,7 +31,9 @@ function Cart() {
           Order pizzas
         </Button>
 
-        <Button onClick={clearCartHandler} type="secondary">Clear cart</Button>
+        <Button onClick={clearCartHandler} type="secondary">
+          Clear cart
+        </Button>
       </div>
     </div>
   );

@@ -5,42 +5,25 @@ const isValidPhone = (str) =>
   );
 
 import { useState } from "react";
-import { Form, redirect, useActionData, useNavigate, useNavigation } from "react-router-dom";
+import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
 import { createOrder } from "../../services/apiRestaurant";
 import Button from "../../ui/Button";
-import { useSelector } from "react-redux";
-
-const fakeCart = [
-  {
-    pizzaId: 12,
-    name: "Mediterranean",
-    quantity: 2,
-    unitPrice: 16,
-    totalPrice: 32,
-  },
-  {
-    pizzaId: 6,
-    name: "Vegetale",
-    quantity: 1,
-    unitPrice: 13,
-    totalPrice: 13,
-  },
-  {
-    pizzaId: 11,
-    name: "Spinach and Mushroom",
-    quantity: 1,
-    unitPrice: 15,
-    totalPrice: 15,
-  },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { clearCart } from "../cart/cartSlice";
+import store from "../../store";
 
 function CreateOrder() {
   const [withPriority, setWithPriority] = useState(false);
-  const navigation = useNavigation(); 
-  const formErrors = useActionData(); 
-  const isSubmitting = navigation.state === 'submitting'; 
-  const cart = fakeCart;
-  const username = useSelector(store => store.user.username); 
+  const navigation = useNavigation();
+  const formErrors = useActionData();
+  const dispatch = useDispatch();
+  const isSubmitting = navigation.state === "submitting";
+  const cart = useSelector((store) => store.cart.cart);
+  let cartisEmpty = false;
+  if (cart.length === 0) {
+    cartisEmpty = true;
+  }
+  const username = useSelector((store) => store.user.username);
 
   return (
     <div className="px-4 py-6">
@@ -50,7 +33,13 @@ function CreateOrder() {
       <Form method="POST">
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <label className="sm:basis-40">First Name</label>
-          <input className="input grow" type="text" name="customer" defaultValue={username} required />
+          <input
+            className="input grow"
+            type="text"
+            name="customer"
+            defaultValue={username}
+            required
+          />
         </div>
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -91,10 +80,14 @@ function CreateOrder() {
           </label>
         </div>
 
+        {cartisEmpty && (
+          <p className="my-3">Please add something to the cart</p>
+        )}
+
         <div>
           <input type="hidden" name="cart" value={JSON.stringify(cart)} />
-          <Button disabled={isSubmitting} type="primary">
-            {isSubmitting ? 'Placing order....' : 'Order now'}
+          <Button disabled={isSubmitting || cartisEmpty} type="primary">
+            {isSubmitting ? "Placing order...." : "Order now"}
           </Button>
         </div>
       </Form>
@@ -102,25 +95,27 @@ function CreateOrder() {
   );
 }
 
-export async function action({request}) { 
-  const formData = await request.formData(); 
-  const data = Object.fromEntries(formData); 
+export async function action({ request }) {
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
 
   const order = {
-    ...data, 
-    cart : JSON.parse(data.cart),
+    ...data,
+    cart: JSON.parse(data.cart),
+  };
+
+  const errors = {};
+  if (!isValidPhone(order.phone)) {
+    errors.phone = "Please enter a valid phone number";
   }
 
-  const errors ={}; 
-  if(!isValidPhone(order.phone)) {
-    errors.phone = "Please enter a valid phone number"; 
-  }
-
-  if(Object.keys(errors).length > 0) return errors; 
+  if (Object.keys(errors).length > 0) return errors;
 
   const newOrder = await createOrder(order);
-  
-  return redirect(`/order/${newOrder.id}`)
+
+  store.dispatch(clearCart());
+
+  return redirect(`/order/${newOrder.id}`);
 }
 
 export default CreateOrder;
